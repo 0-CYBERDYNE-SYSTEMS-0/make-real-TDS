@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Icon } from '@tldraw/tldraw';
 
 interface SystemMessageEditorProps {
   initialMessage: string;
@@ -20,23 +21,24 @@ export function SystemMessageEditor({ initialMessage, onSave }: SystemMessageEdi
 
   if (!isEditing) {
     return (
-      <div>
-        <button onClick={() => setIsEditing(true)}>Edit System Message</button>
-      </div>
+      <button className="system-message-editor-button" onClick={() => setIsEditing(true)}>
+        <Icon icon="edit" />
+      </button>
     );
   }
 
   return (
-    <div>
+    <div className="system-message-editor">
       <textarea
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         rows={10}
         cols={50}
       />
-      <br />
-      <button onClick={handleSave}>Save</button>
-      <button onClick={() => setIsEditing(false)}>Cancel</button>
+      <div className="system-message-editor-actions">
+        <button onClick={handleSave}>Save</button>
+        <button onClick={() => setIsEditing(false)}>Cancel</button>
+      </div>
     </div>
   );
 }

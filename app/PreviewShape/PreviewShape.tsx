@@ -40,7 +40,6 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 	override canResize = () => true
 	override canBind = () => false
 	override canUnmount = () => false
-
 	override component(shape: PreviewShape) {
 		const isEditing = useIsEditing(shape.id)
 		const toast = useToasts()
@@ -95,7 +94,6 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
 </body>`
 		)
-
 		return (
 			<HTMLContainer className="tl-embed-container" id={shape.id}>
 				{htmlToUse ? (
@@ -237,7 +235,6 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			</HTMLContainer>
 		)
 	}
-
 	override toSvg(shape: PreviewShape, ctx: SvgExportContext): SVGElement | Promise<SVGElement> {
 		const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
 		// while screenshot is the same as the old one, keep waiting for a new one
@@ -272,7 +269,6 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			}
 		})
 	}
-
 	indicator(shape: PreviewShape) {
 		return <rect width={shape.props.w} height={shape.props.h} />
 	}
@@ -280,13 +276,19 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 	exportShape(shape: PreviewShape, format: 'svg' | 'png' | 'json' | 'html') {
 		switch (format) {
 			case 'svg':
-				return this.toSvg(shape, {} as SvgExportContext);
+				this.toSvg(shape, {} as SvgExportContext).then(svg => {
+					this.downloadSvg(svg);
+				});
+				break;
 			case 'png':
-				return this.toPng(shape);
+				this.toPng(shape);
+				break;
 			case 'json':
-				return this.toJson(shape);
+				this.toJson(shape);
+				break;
 			case 'html':
-				return this.exportHTML(shape);
+				this.exportHTML(shape);
+				break;
 		}
 	}
 
@@ -302,8 +304,27 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 	}
 
 	async toPng(shape: PreviewShape) {
-		// Placeholder implementation
-		console.log('PNG export not implemented yet');
+		const svg = await this.toSvg(shape, {} as SvgExportContext);
+		const canvas = document.createElement('canvas');
+		const ctx = canvas.getContext('2d');
+		const img = new Image();
+		
+		img.onload = () => {
+			canvas.width = shape.props.w;
+			canvas.height = shape.props.h;
+			ctx!.drawImage(img, 0, 0, shape.props.w, shape.props.h);
+			
+			canvas.toBlob((blob) => {
+				const url = URL.createObjectURL(blob!);
+				const link = document.createElement('a');
+				link.href = url;
+				link.download = 'exported_image.png';
+				link.click();
+				URL.revokeObjectURL(url);
+			}, 'image/png');
+		};
+		
+		img.src = 'data:image/svg+xml;base64,' + btoa(new XMLSerializer().serializeToString(svg));
 	}
 
 	toJson(shape: PreviewShape) {
@@ -320,6 +341,17 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 		const link = document.createElement('a');
 		link.href = url;
 		link.download = 'exported_shape.json';
+		link.click();
+		URL.revokeObjectURL(url);
+	}
+
+	downloadSvg(svg: SVGElement) {
+		const svgString = new XMLSerializer().serializeToString(svg);
+		const blob = new Blob([svgString], { type: 'image/svg+xml' });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = 'exported_image.svg';
 		link.click();
 		URL.revokeObjectURL(url);
 	}

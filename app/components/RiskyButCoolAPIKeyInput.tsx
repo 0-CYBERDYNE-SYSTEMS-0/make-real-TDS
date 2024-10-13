@@ -1,10 +1,7 @@
-import { Icon, useBreakpoint } from '@tldraw/tldraw'
+import { Icon } from '@tldraw/tldraw'
 import { ChangeEvent, useCallback } from 'react'
 
 export function RiskyButCoolAPIKeyInput() {
-	const breakpoint = useBreakpoint()
-
-	// Store the API key locally, but ONLY in development mode
 	const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
 		localStorage.setItem('makeitreal_key', e.target.value)
 	}, [])
@@ -16,7 +13,7 @@ export function RiskyButCoolAPIKeyInput() {
 	}, [])
 
 	return (
-		<div className={`your-own-api-key ${breakpoint < 5 ? 'your-own-api-key__mobile' : ''}`}>
+		<div className="your-own-api-key">
 			<div className="your-own-api-key__inner">
 				<div className="input__wrapper">
 					<input
