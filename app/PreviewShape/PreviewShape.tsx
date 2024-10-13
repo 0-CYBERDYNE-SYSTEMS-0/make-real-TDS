@@ -13,6 +13,7 @@ import {
 	useToasts,
 	useValue,
 } from '@tldraw/tldraw'
+import { useCallback, useState, useRef, useEffect } from 'react'
 
 export type PreviewShape = TLBaseShape<
 	'response',
@@ -43,6 +44,31 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 	override component(shape: PreviewShape) {
 		const isEditing = useIsEditing(shape.id)
 		const toast = useToasts()
+		const [showExportMenu, setShowExportMenu] = useState(false)
+		const exportMenuRef = useRef<HTMLDivElement>(null)
+
+		const handleExport = useCallback((format: 'svg' | 'png' | 'json' | 'html') => {
+			this.exportShape(shape, format)
+			setShowExportMenu(false)
+		}, [shape])
+
+		const handleClickOutside = useCallback((event: MouseEvent) => {
+			if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) {
+				setShowExportMenu(false)
+			}
+		}, [])
+
+		useEffect(() => {
+			if (showExportMenu) {
+				document.addEventListener('mousedown', handleClickOutside)
+			} else {
+				document.removeEventListener('mousedown', handleClickOutside)
+			}
+
+			return () => {
+				document.removeEventListener('mousedown', handleClickOutside)
+			}
+		}, [showExportMenu, handleClickOutside])
 
 		const boxShadow = useValue(
 			'box shadow',
@@ -127,6 +153,58 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 				>
 					<Icon icon="duplicate" />
 				</div>
+				<div
+					style={{
+						position: 'absolute',
+						top: 0,
+						right: -80,
+						height: 40,
+						width: 40,
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						cursor: 'pointer',
+						pointerEvents: 'all',
+					}}
+					onClick={() => setShowExportMenu(!showExportMenu)}
+					onPointerDown={stopEventPropagation}
+				>
+					<Icon icon="export" />
+				</div>
+				{showExportMenu && (
+					<div
+						ref={exportMenuRef}
+						style={{
+							position: 'absolute',
+							top: 40,
+							right: -120,
+							backgroundColor: 'var(--color-panel)',
+							borderRadius: 'var(--radius-2)',
+							boxShadow: '0 0 0 1px var(--color-muted-1)',
+							overflow: 'hidden',
+						}}
+						onMouseLeave={() => setShowExportMenu(false)}
+					>
+						{['svg', 'png', 'json', 'html'].map((format) => (
+							<div
+								key={format}
+								style={{
+									padding: '8px 16px',
+									cursor: 'pointer',
+								}}
+								onClick={() => handleExport(format as 'svg' | 'png' | 'json' | 'html')}
+								onMouseEnter={(e) => {
+									e.currentTarget.style.backgroundColor = 'var(--color-muted-2)'
+								}}
+								onMouseLeave={(e) => {
+									e.currentTarget.style.backgroundColor = ''
+								}}
+							>
+								Export as {format.toUpperCase()}
+							</div>
+						))}
+					</div>
+				)}
 				{htmlToUse && (
 					<div
 						style={{
@@ -160,7 +238,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 		)
 	}
 
-	override toSvg(shape: PreviewShape, _ctx: SvgExportContext): SVGElement | Promise<SVGElement> {
+	override toSvg(shape: PreviewShape, ctx: SvgExportContext): SVGElement | Promise<SVGElement> {
 		const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
 		// while screenshot is the same as the old one, keep waiting for a new one
 		return new Promise((resolve, _) => {
@@ -197,6 +275,53 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 
 	indicator(shape: PreviewShape) {
 		return <rect width={shape.props.w} height={shape.props.h} />
+	}
+
+	exportShape(shape: PreviewShape, format: 'svg' | 'png' | 'json' | 'html') {
+		switch (format) {
+			case 'svg':
+				return this.toSvg(shape, {} as SvgExportContext);
+			case 'png':
+				return this.toPng(shape);
+			case 'json':
+				return this.toJson(shape);
+			case 'html':
+				return this.exportHTML(shape);
+		}
+	}
+
+	exportHTML(shape: PreviewShape) {
+		const htmlContent = shape.props.html;
+		const blob = new Blob([htmlContent], { type: 'text/html' });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = 'exported_html.html';
+		link.click();
+		URL.revokeObjectURL(url);
+	}
+
+	async toPng(shape: PreviewShape) {
+		// Placeholder implementation
+		console.log('PNG export not implemented yet');
+	}
+
+	toJson(shape: PreviewShape) {
+		const json = JSON.stringify({
+			id: shape.id,
+			type: shape.type,
+			x: shape.x,
+			y: shape.y,
+			props: shape.props
+		}, null, 2);
+
+		const blob = new Blob([json], { type: 'application/json' });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = 'exported_shape.json';
+		link.click();
+		URL.revokeObjectURL(url);
 	}
 }
 
