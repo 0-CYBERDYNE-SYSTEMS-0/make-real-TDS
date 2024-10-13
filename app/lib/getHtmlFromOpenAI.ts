@@ -12,6 +12,7 @@ export async function getHtmlFromOpenAI({
 	grid,
 	theme = 'light',
 	previousPreviews = [],
+	systemMessage, // Add this parameter
 }: {
 	image: string
 	apiKey: string
@@ -23,13 +24,14 @@ export async function getHtmlFromOpenAI({
 		labels: boolean
 	}
 	previousPreviews?: PreviewShape[]
+	systemMessage: string // Add this type
 }) {
 	if (!apiKey) throw Error('You need to provide an API key (sorry)')
 
 	const messages: GPT4VCompletionRequest['messages'] = [
 		{
 			role: 'system',
-			content: OPEN_AI_SYSTEM_PROMPT,
+			content: systemMessage, // Use the provided system message
 		},
 		{
 			role: 'user',
