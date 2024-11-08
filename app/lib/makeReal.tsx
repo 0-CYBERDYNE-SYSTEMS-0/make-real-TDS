@@ -1,63 +1,67 @@
 import { Editor, createShapeId, getSvgAsImage } from '@tldraw/tldraw'
 import { getSelectionAsText } from './getSelectionAsText'
-import { getHtmlFromOpenAI } from './getHtmlFromOpenAI'
+import { getHtmlFromAnthropic } from './getHtmlFromAnthropic'
 import { blobToBase64 } from './blobToBase64'
 import { addGridToSvg } from './addGridToSvg'
 import { PreviewShape } from '../PreviewShape/PreviewShape'
 
-export async function makeReal(editor: Editor, apiKey: string, systemMessage: string) {
-	// Get the selected shapes (we need at least one)
+export async function makeReal(editor: Editor, _: string, systemMessage: string) {
+	console.log('Starting makeReal function...')
+	
 	const selectedShapes = editor.getSelectedShapes()
+	console.log('Selected shapes count:', selectedShapes.length)
 
 	if (selectedShapes.length === 0) throw Error('First select something to make real.')
 
-	// Create the preview shape
 	const { maxX, midY } = editor.getSelectionPageBounds()!
 	const newShapeId = createShapeId()
+	console.log('Creating new shape with ID:', newShapeId)
+	
 	editor.createShape<PreviewShape>({
 		id: newShapeId,
 		type: 'response',
-		x: maxX + 60, // to the right of the selection
-		y: midY - (540 * 2) / 3 / 2, // half the height of the preview's initial shape
+		x: maxX + 60,
+		y: midY - (540 * 2) / 3 / 2,
 		props: { html: '' },
 	})
 
-	// Get an SVG based on the selected shapes
+	console.log('Getting SVG...')
 	const svg = await editor.getSvg(selectedShapes, {
 		scale: 1,
 		background: true,
 	})
 
 	if (!svg) {
+		console.error('Failed to get SVG')
 		return
 	}
 
-	// Add the grid lines to the SVG
 	const grid = { color: 'red', size: 100, labels: true }
+	console.log('Adding grid to SVG...')
 	addGridToSvg(svg, grid)
 
 	if (!svg) throw Error(`Could not get the SVG.`)
 
-	// Turn the SVG into a DataUrl
 	const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+	console.log('Converting SVG to image...')
 	const blob = await getSvgAsImage(svg, IS_SAFARI, {
 		type: 'png',
 		quality: 0.8,
 		scale: 1,
 	})
 	const dataUrl = await blobToBase64(blob!)
-	// downloadDataURLAsFile(dataUrl, 'tldraw.png')
+	console.log('Image converted to base64, length:', dataUrl.length)
 
-	// Get any previous previews among the selected shapes
 	const previousPreviews = selectedShapes.filter((shape) => {
 		return shape.type === 'response'
 	}) as PreviewShape[]
+	console.log('Previous previews count:', previousPreviews.length)
 
-	// Send everything to OpenAI and get some HTML back
 	try {
-		const json = await getHtmlFromOpenAI({
+		console.log('Making request to Anthropic API...')
+		const json = await getHtmlFromAnthropic({
 			image: dataUrl,
-			apiKey,
+			apiKey: '',
 			text: getSelectionAsText(editor),
 			previousPreviews,
 			grid,
@@ -66,26 +70,31 @@ export async function makeReal(editor: Editor, apiKey: string, systemMessage: st
 		})
 
 		if (!json) {
-			throw Error('Could not contact OpenAI.')
+			console.error('No response from Anthropic API')
+			throw Error('Could not contact Anthropic API.')
 		}
 
 		if (json?.error) {
+			console.error('Anthropic API error:', json.error)
 			throw Error(`${json.error.message?.slice(0, 128)}...`)
 		}
 
-		// Extract the HTML from the response
+		console.log('Got response from Anthropic API')
 		const message = json.choices[0].message.content
+		console.log('Raw message:', message)
+		
 		const start = message.indexOf('<!DOCTYPE html>')
 		const end = message.indexOf('</html>')
+		console.log('HTML bounds found:', { start, end })
+		
 		const html = message.slice(start, end + '</html>'.length)
 
-		// No HTML? Something went wrong
 		if (html.length < 100) {
-			console.warn(message)
+			console.warn('Generated HTML too short:', html)
 			throw Error('Could not generate a design from those wireframes.')
 		}
 
-		// Update the shape with the new props
+		console.log('Updating shape with generated HTML')
 		editor.updateShape<PreviewShape>({
 			id: newShapeId,
 			type: 'response',
@@ -94,9 +103,9 @@ export async function makeReal(editor: Editor, apiKey: string, systemMessage: st
 			},
 		})
 
-		console.log(`Response: ${message}`)
+		console.log('Shape updated successfully')
 	} catch (e) {
-		// If anything went wrong, delete the shape.
+		console.error('Error in makeReal:', e)
 		editor.deleteShape(newShapeId)
 		throw e
 	}

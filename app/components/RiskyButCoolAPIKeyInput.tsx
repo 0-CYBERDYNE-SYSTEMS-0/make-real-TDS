@@ -8,7 +8,7 @@ export function RiskyButCoolAPIKeyInput() {
 
 	const handleQuestionMessage = useCallback(() => {
 		window.alert(
-			`If you have an OpenAI developer key, you can put it in this input and it will be used when posting to OpenAI.\n\nSee https://platform.openai.com/api-keys to get a key.\n\nPutting API keys into boxes is generally a bad idea! If you have any concerns, create an API key and then revoke it after using this site.`
+			`If you have an Anthropic API key, you can put it in this input and it will be used when making requests to Claude.\n\nSee https://console.anthropic.com/account/keys to get a key.\n\nPutting API keys into boxes is generally a bad idea! If you have any concerns, create an API key and then revoke it after using this site.`
 		)
 	}, [])
 
@@ -17,13 +17,12 @@ export function RiskyButCoolAPIKeyInput() {
 			<div className="your-own-api-key__inner">
 				<div className="input__wrapper">
 					<input
-						id="openai_key_risky_but_cool"
-						defaultValue={
-							localStorage.getItem('makeitreal_key') ?? process.env.OPENAI_API_KEY ?? ''
-						}
+						id="anthropic_key_risky_but_cool"
+						defaultValue={localStorage.getItem('makeitreal_key') ?? ''}
 						onChange={handleChange}
 						spellCheck={false}
 						autoCapitalize="off"
+						placeholder="Enter your Anthropic API key"
 					/>
 				</div>
 				<button className="question__button" onClick={handleQuestionMessage}>

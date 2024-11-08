@@ -12,10 +12,7 @@ export function MakeRealButton({ systemMessage }: MakeRealButtonProps) {
 
 	const handleClick = useCallback(async () => {
 		try {
-			const input = document.getElementById('openai_key_risky_but_cool') as HTMLInputElement
-			const apiKey = input?.value ?? null
-			if (!apiKey) throw Error('Make sure the input includes your API Key!')
-			await makeReal(editor, apiKey, systemMessage)
+			await makeReal(editor, '', systemMessage)
 		} catch (e) {
 			console.error(e)
 			addToast({
@@ -27,8 +24,13 @@ export function MakeRealButton({ systemMessage }: MakeRealButtonProps) {
 	}, [editor, addToast, systemMessage])
 
 	return (
-		<button className="makeRealButton" onClick={handleClick}>
-			Make Real
-		</button>
+		<div style={{ display: 'flex', alignItems: 'center', padding: '0 8px' }}>
+			<button 
+				className="makeRealButton" 
+				onClick={handleClick}
+			>
+				Make Real
+			</button>
+		</div>
 	)
 }
