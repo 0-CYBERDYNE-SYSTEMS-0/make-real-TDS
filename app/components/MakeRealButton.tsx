@@ -1,18 +1,20 @@
 import { useEditor, useToasts } from '@tldraw/tldraw'
 import { useCallback } from 'react'
 import { makeReal } from '../lib/makeReal'
+import { Settings } from './SettingsPanel'
 
 interface MakeRealButtonProps {
 	systemMessage: string;
+	settings: Settings;
 }
 
-export function MakeRealButton({ systemMessage }: MakeRealButtonProps) {
+export function MakeRealButton({ systemMessage, settings }: MakeRealButtonProps) {
 	const editor = useEditor()
 	const { addToast } = useToasts()
 
 	const handleClick = useCallback(async () => {
 		try {
-			await makeReal(editor, '', systemMessage)
+			await makeReal(editor, '', systemMessage, settings)
 		} catch (e) {
 			console.error(e)
 			addToast({
@@ -21,7 +23,7 @@ export function MakeRealButton({ systemMessage }: MakeRealButtonProps) {
 				description: (e as Error).message.slice(0, 100),
 			})
 		}
-	}, [editor, addToast, systemMessage])
+	}, [editor, addToast, systemMessage, settings])
 
 	return (
 		<div style={{ display: 'flex', alignItems: 'center', padding: '0 8px' }}>

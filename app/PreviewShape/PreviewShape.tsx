@@ -276,7 +276,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 	exportShape(shape: PreviewShape, format: 'svg' | 'png' | 'json' | 'html') {
 		switch (format) {
 			case 'svg':
-				this.toSvg(shape, {} as SvgExportContext).then(svg => {
+				Promise.resolve(this.toSvg(shape, {} as SvgExportContext)).then((svg: SVGElement) => {
 					this.downloadSvg(svg);
 				});
 				break;

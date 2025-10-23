@@ -192,3 +192,359 @@
 .system-message-editor-actions button:hover {
 	opacity: 0.9;
 }
+
+/* ------------------ Settings Panel ----------------- */
+
+.settings-panel-button {
+	position: fixed;
+	top: 20px;
+	left: 20px;
+	z-index: 9999999;
+	background-color: var(--color-primary);
+	color: white;
+	border: none;
+	border-radius: 50%;
+	width: 40px;
+	height: 40px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	cursor: pointer;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+	transition: opacity 0.2s;
+}
+
+.settings-panel-button:hover {
+	opacity: 0.9;
+}
+
+.settings-panel-overlay {
+	position: fixed;
+	inset: 0;
+	background-color: rgba(0, 0, 0, 0.5);
+	z-index: 99999999;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 20px;
+}
+
+.settings-panel {
+	background-color: var(--color-panel);
+	color: var(--color-text-0);
+	border-radius: 12px;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+	width: 100%;
+	max-width: 500px;
+	max-height: 90vh;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+
+.settings-panel-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 20px 24px;
+	border-bottom: 1px solid var(--color-muted-1);
+}
+
+.settings-panel-header h2 {
+	margin: 0;
+	font-size: 20px;
+	font-weight: 600;
+}
+
+.settings-panel-close {
+	all: unset;
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	border-radius: 4px;
+	transition: background-color 0.2s;
+}
+
+.settings-panel-close:hover {
+	background-color: var(--color-muted-1);
+}
+
+.settings-panel-content {
+	padding: 24px;
+	overflow-y: auto;
+	flex: 1;
+}
+
+.settings-field {
+	margin-bottom: 20px;
+}
+
+.settings-field label {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 14px;
+	font-weight: 500;
+	margin-bottom: 8px;
+	color: var(--color-text-1);
+}
+
+.settings-field-value {
+	margin-left: auto;
+	color: var(--color-text-2);
+	font-weight: 400;
+}
+
+.settings-field select,
+.settings-field input[type="text"],
+.settings-field input[type="password"],
+.settings-field input[type="number"] {
+	width: 100%;
+	padding: 10px 12px;
+	background-color: var(--color-low);
+	color: var(--color-text-0);
+	border: 1px solid var(--color-muted-1);
+	border-radius: 6px;
+	font-size: 14px;
+	font-family: inherit;
+	transition: border-color 0.2s;
+}
+
+.settings-field select:focus,
+.settings-field input:focus {
+	outline: none;
+	border-color: var(--color-primary);
+}
+
+.settings-field input[type="range"] {
+	width: 100%;
+	height: 6px;
+	background: var(--color-muted-1);
+	border-radius: 3px;
+	outline: none;
+}
+
+.settings-field input[type="range"]::-webkit-slider-thumb {
+	appearance: none;
+	width: 18px;
+	height: 18px;
+	background: var(--color-primary);
+	border-radius: 50%;
+	cursor: pointer;
+}
+
+.settings-field input[type="range"]::-moz-range-thumb {
+	width: 18px;
+	height: 18px;
+	background: var(--color-primary);
+	border-radius: 50%;
+	cursor: pointer;
+	border: none;
+}
+
+.settings-hint {
+	display: block;
+	margin-top: 6px;
+	font-size: 12px;
+	color: var(--color-text-2);
+}
+
+.settings-info-button {
+	all: unset;
+	width: 18px;
+	height: 18px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	opacity: 0.6;
+	transition: opacity 0.2s;
+}
+
+.settings-info-button:hover {
+	opacity: 1;
+}
+
+.settings-toggle-advanced {
+	all: unset;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 0;
+	cursor: pointer;
+	font-size: 14px;
+	color: var(--color-primary);
+	margin-bottom: 16px;
+	transition: opacity 0.2s;
+}
+
+.settings-toggle-advanced:hover {
+	opacity: 0.8;
+}
+
+.settings-panel-actions {
+	display: flex;
+	gap: 12px;
+	padding: 20px 24px;
+	border-top: 1px solid var(--color-muted-1);
+}
+
+.settings-button-primary,
+.settings-button-secondary {
+	flex: 1;
+	padding: 10px 20px;
+	border: none;
+	border-radius: 6px;
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: opacity 0.2s;
+	font-family: inherit;
+}
+
+.settings-button-primary {
+	background-color: var(--color-primary);
+	color: white;
+}
+
+.settings-button-secondary {
+	background-color: var(--color-muted-1);
+	color: var(--color-text-0);
+}
+
+.settings-button-primary:hover,
+.settings-button-secondary:hover {
+	opacity: 0.9;
+}
+
+/* ------------------ Responsive Design ----------------- */
+
+@media (max-width: 768px) {
+	/* Settings Panel */
+	.settings-panel {
+		max-width: 100%;
+		max-height: 100vh;
+		border-radius: 0;
+	}
+
+	.settings-panel-header {
+		padding: 16px 20px;
+	}
+
+	.settings-panel-header h2 {
+		font-size: 18px;
+	}
+
+	.settings-panel-content {
+		padding: 20px;
+	}
+
+	.settings-panel-actions {
+		padding: 16px 20px;
+		flex-direction: column;
+	}
+
+	.settings-button-primary,
+	.settings-button-secondary {
+		width: 100%;
+	}
+
+	/* System Message Editor */
+	.system-message-editor-button {
+		top: 80px;
+		right: 20px;
+		width: 36px;
+		height: 36px;
+	}
+
+	.system-message-editor {
+		top: 130px;
+		right: 20px;
+		left: 20px;
+		width: auto;
+		max-width: calc(100vw - 40px);
+	}
+
+	.system-message-editor textarea {
+		font-size: 14px;
+		min-height: 200px;
+	}
+
+	/* Make Real Button */
+	.makeRealButton {
+		font-size: 14px;
+		padding: var(--space-2) var(--space-3);
+	}
+
+	/* API Key Input */
+	.your-own-api-key {
+		max-width: calc(100vw - 40px);
+		left: 20px;
+		right: 20px;
+		transform: none;
+		bottom: 20px;
+	}
+
+	.your-own-api-key__mobile {
+		bottom: 80px;
+	}
+
+	.input__wrapper:not(:focus-within)::after {
+		font-size: 11px;
+		padding: 0px 8px;
+	}
+
+	.your-own-api-key input {
+		font-size: 11px;
+		padding: 4px 8px;
+		height: 28px;
+	}
+
+	.question__button {
+		width: 28px;
+		height: 28px;
+	}
+
+	.settings-panel-button {
+		width: 36px;
+		height: 36px;
+	}
+}
+
+@media (max-width: 480px) {
+	.settings-panel-overlay {
+		padding: 0;
+	}
+
+	.settings-field label {
+		font-size: 13px;
+	}
+
+	.settings-field select,
+	.settings-field input {
+		font-size: 13px;
+		padding: 8px 10px;
+	}
+
+	.settings-hint {
+		font-size: 11px;
+	}
+}
+
+/* Touch improvements for mobile */
+@media (hover: none) and (pointer: coarse) {
+	.settings-panel-close,
+	.settings-info-button,
+	.question__button {
+		min-width: 44px;
+		min-height: 44px;
+	}
+
+	.settings-button-primary,
+	.settings-button-secondary {
+		min-height: 44px;
+	}
+}
