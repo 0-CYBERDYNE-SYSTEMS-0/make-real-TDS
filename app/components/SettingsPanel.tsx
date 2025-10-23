@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Icon } from '@tldraw/tldraw';
+import { createPortal } from 'react-dom';
 
 interface SettingsPanelProps {
   initialSettings: Settings;
@@ -70,7 +70,28 @@ export function SettingsPanel({ initialSettings, onSave }: SettingsPanelProps) {
     setSettings(initialSettings);
   }, [initialSettings]);
 
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+      }
+    };
+    
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }
+  }, [isOpen]);
+
   const handleSave = () => {
+    // Validate API key for non-lmstudio providers
+    if (settings.provider !== 'lmstudio' && !settings.apiKey?.trim()) {
+      alert(`Please enter an API key for ${settings.provider}`);
+      return;
+    }
+    
+    console.log('Saving settings:', settings);
     onSave(settings);
     setIsOpen(false);
   };
@@ -96,13 +117,16 @@ export function SettingsPanel({ initialSettings, onSave }: SettingsPanelProps) {
         onClick={() => setIsOpen(true)}
         title="Settings"
       >
-        <Icon icon="gear" />
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>
+          <path d="M14 8a1.5 1.5 0 0 0-.5-1.1l-.9-.8.2-1.2a1.5 1.5 0 0 0-1.1-1.7l-1.2-.3-.6-1.1A1.5 1.5 0 0 0 8 1.1a1.5 1.5 0 0 0-1.9.7l-.6 1-.1.1-1.2.3a1.5 1.5 0 0 0-1.1 1.7l.2 1.2-.9.8A1.5 1.5 0 0 0 2 8c0 .4.2.9.5 1.1l.9.8-.2 1.2a1.5 1.5 0 0 0 1.1 1.7l1.2.3.6 1.1a1.5 1.5 0 0 0 1.9.7 1.5 1.5 0 0 0 1.9-.7l.6-1.1 1.2-.3a1.5 1.5 0 0 0 1.1-1.7l-.2-1.2.9-.8c.3-.2.5-.7.5-1.1z" opacity="0.4"/>
+        </svg>
         <span className="settings-button-text">Settings</span>
       </button>
     );
   }
 
-  return (
+  const modalContent = (
     <div className="settings-panel-overlay" onClick={() => setIsOpen(false)}>
       <div className="settings-panel" onClick={(e) => e.stopPropagation()}>
         <div className="settings-panel-header">
@@ -112,7 +136,9 @@ export function SettingsPanel({ initialSettings, onSave }: SettingsPanelProps) {
             onClick={() => setIsOpen(false)}
             title="Close"
           >
-            <Icon icon="cross-2" />
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" strokeWidth="2" fill="none"/>
+            </svg>
           </button>
         </div>
 
@@ -186,7 +212,11 @@ export function SettingsPanel({ initialSettings, onSave }: SettingsPanelProps) {
                   }}
                   title="API Key Info"
                 >
-                  <Icon icon="question" />
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+                    <path d="M8 6a1 1 0 1 1 0 2v3" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                    <circle cx="8" cy="12" r="0.5"/>
+                  </svg>
                 </button>
               </label>
               <input
@@ -224,7 +254,13 @@ export function SettingsPanel({ initialSettings, onSave }: SettingsPanelProps) {
             onClick={() => setShowAdvanced(!showAdvanced)}
           >
             {showAdvanced ? 'Hide' : 'Show'} Advanced Settings
-            <Icon icon={showAdvanced ? 'chevron-up' : 'chevron-down'} />
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style={{ marginLeft: '4px' }}>
+              {showAdvanced ? (
+                <path d="M4 10l4-4 4 4" stroke="currentColor" strokeWidth="2" fill="none"/>
+              ) : (
+                <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="2" fill="none"/>
+              )}
+            </svg>
           </button>
 
           {/* Advanced Settings */}
@@ -278,5 +314,22 @@ export function SettingsPanel({ initialSettings, onSave }: SettingsPanelProps) {
         </div>
       </div>
     </div>
+  );
+
+  return (
+    <>
+      <button
+        className="settings-button"
+        onClick={() => setIsOpen(true)}
+        title="Settings"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>
+          <path d="M14 8a1.5 1.5 0 0 0-.5-1.1l-.9-.8.2-1.2a1.5 1.5 0 0 0-1.1-1.7l-1.2-.3-.6-1.1A1.5 1.5 0 0 0 8 1.1a1.5 1.5 0 0 0-1.9.7l-.6 1-.1.1-1.2.3a1.5 1.5 0 0 0-1.1 1.7l.2 1.2-.9.8A1.5 1.5 0 0 0 2 8c0 .4.2.9.5 1.1l.9.8-.2 1.2a1.5 1.5 0 0 0 1.1 1.7l1.2.3.6 1.1a1.5 1.5 0 0 0 1.9.7 1.5 1.5 0 0 0 1.9-.7l.6-1.1 1.2-.3a1.5 1.5 0 0 0 1.1-1.7l-.2-1.2.9-.8c.3-.2.5-.7.5-1.1z" opacity="0.4"/>
+        </svg>
+        <span className="settings-button-text">Settings</span>
+      </button>
+      {isOpen && typeof document !== 'undefined' && createPortal(modalContent, document.body)}
+    </>
   );
 }

@@ -9,7 +9,7 @@ import { SystemMessageEditor } from './components/SystemMessageEditor'
 import { Settings } from './components/SettingsPanel'
 import { useState, useEffect } from 'react'
 import { OPEN_AI_SYSTEM_PROMPT } from './prompt'
-import { Tldraw as TldrawComponent } from '@tldraw/tldraw'
+import { Tldraw as TldrawComponent, TLComponents } from '@tldraw/tldraw'
 
 const Tldraw = dynamic(async () => {
 	const mod = await import('@tldraw/tldraw')
@@ -54,17 +54,22 @@ export default function App() {
 		localStorage.setItem('makereal_settings', JSON.stringify(newSettings));
 	};
 
+	// Define components for tldraw UI customization
+	const components: TLComponents = {
+		SharePanel: () => (
+			<Toolbar
+				systemMessage={systemMessage}
+				settings={settings}
+				onSettingsSave={handleSettingsSave}
+			/>
+		),
+	}
+
 	return (
 		<div className="editor">
 			<Tldraw
 				persistenceKey="make-real"
-				shareZone={
-					<Toolbar
-						systemMessage={systemMessage}
-						settings={settings}
-						onSettingsSave={handleSettingsSave}
-					/>
-				}
+				components={components}
 				shapeUtils={shapeUtils}
 			>
 				<TldrawLogo />

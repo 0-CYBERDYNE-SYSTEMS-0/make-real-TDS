@@ -53,9 +53,16 @@ export async function getHtmlFromProvider({
 	const endpoint = getEndpoint(settings.provider)
 	const requestBody = buildRequestBody(settings, image, systemMessage)
 
+	// Validate API key before making request
+	if (settings.provider !== 'lmstudio' && !settings.apiKey?.trim()) {
+		throw new Error(`Please configure your ${settings.provider.toUpperCase()} API key in Settings`)
+	}
+
 	try {
 		console.log('=== Making API Request ===')
 		console.log('Request URL:', endpoint)
+		console.log('Provider:', settings.provider)
+		console.log('Model:', settings.model)
 
 		const response = await fetch(endpoint, {
 			method: 'POST',
@@ -76,8 +83,17 @@ export async function getHtmlFromProvider({
 			try {
 				const errorData = JSON.parse(errorText)
 				console.error('Parsed error data:', errorData)
+				
+				// Provide more helpful error messages
+				if (response.status === 401 || response.status === 403) {
+					throw new Error(`Invalid API key for ${settings.provider}. Please check your API key in Settings.`)
+				}
+				
 				throw new Error(errorData.error?.message || `API error: ${response.statusText}`)
 			} catch (parseError) {
+				if (parseError instanceof Error && parseError.message.includes('Invalid API key')) {
+					throw parseError
+				}
 				console.error('Could not parse error response:', parseError)
 				throw new Error(`API error: ${response.statusText} - ${errorText}`)
 			}

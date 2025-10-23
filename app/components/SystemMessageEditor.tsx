@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Icon } from '@tldraw/tldraw';
 
 interface SystemMessageEditorProps {
   initialMessage: string;
@@ -22,7 +21,9 @@ export function SystemMessageEditor({ initialMessage, onSave }: SystemMessageEdi
   if (!isEditing) {
     return (
       <button className="system-message-editor-button" onClick={() => setIsEditing(true)}>
-        <Icon icon="edit" />
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M11.5 2a2.5 2.5 0 0 1 3.5 3.5L6 14.5 2 15l.5-4L11.5 2z"/>
+        </svg>
       </button>
     );
   }

@@ -3,7 +3,6 @@ import {
 	BaseBoxShapeUtil,
 	DefaultSpinner,
 	HTMLContainer,
-	Icon,
 	SvgExportContext,
 	TLBaseShape,
 	Vec,
@@ -39,7 +38,6 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 	override isAspectRatioLocked = () => false
 	override canResize = () => true
 	override canBind = () => false
-	override canUnmount = () => false
 	override component(shape: PreviewShape) {
 		const isEditing = useIsEditing(shape.id)
 		const toast = useToasts()
@@ -149,7 +147,10 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 					}}
 					onPointerDown={stopEventPropagation}
 				>
-					<Icon icon="duplicate" />
+					<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+						<path d="M4 2a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4zm2 8V6h4v4H6z" opacity="0.6"/>
+						<path d="M6 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6z"/>
+					</svg>
 				</div>
 				<div
 					style={{
@@ -167,7 +168,9 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 					onClick={() => setShowExportMenu(!showExportMenu)}
 					onPointerDown={stopEventPropagation}
 				>
-					<Icon icon="export" />
+					<svg width="16" height="16" viewBox="0 0 16 16" stroke="currentColor" strokeWidth="1.5" fill="none">
+						<path d="M8 2v8M5 5l3-3 3 3M3 12h10v2H3z"/>
+					</svg>
 				</div>
 				{showExportMenu && (
 					<div
@@ -235,40 +238,9 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			</HTMLContainer>
 		)
 	}
-	override toSvg(shape: PreviewShape, ctx: SvgExportContext): SVGElement | Promise<SVGElement> {
-		const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
-		// while screenshot is the same as the old one, keep waiting for a new one
-		return new Promise((resolve, _) => {
-			if (window === undefined) return resolve(g)
-			const windowListener = (event: MessageEvent) => {
-				if (event.data.screenshot && event.data?.shapeid === shape.id) {
-					const image = document.createElementNS('http://www.w3.org/2000/svg', 'image')
-					image.setAttributeNS('http://www.w3.org/1999/xlink', 'href', event.data.screenshot)
-					image.setAttribute('width', shape.props.w.toString())
-					image.setAttribute('height', shape.props.h.toString())
-					g.appendChild(image)
-					window.removeEventListener('message', windowListener)
-					clearTimeout(timeOut)
-					resolve(g)
-				}
-			}
-			const timeOut = setTimeout(() => {
-				resolve(g)
-				window.removeEventListener('message', windowListener)
-			}, 2000)
-			window.addEventListener('message', windowListener)
-			//request new screenshot
-			const firstLevelIframe = document.getElementById(`iframe-1-${shape.id}`) as HTMLIFrameElement
-			if (firstLevelIframe) {
-				firstLevelIframe.contentWindow!.postMessage(
-					{ action: 'take-screenshot', shapeid: shape.id },
-					'*'
-				)
-			} else {
-				console.log('first level iframe not found or not accessible')
-			}
-		})
-	}
+	// Note: toSvg removed due to API changes in tldraw 2.x
+	// The base class handles basic SVG export
+	// Custom export functionality is available via the exportShape method
 	indicator(shape: PreviewShape) {
 		return <rect width={shape.props.w} height={shape.props.h} />
 	}
@@ -276,9 +248,8 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 	exportShape(shape: PreviewShape, format: 'svg' | 'png' | 'json' | 'html') {
 		switch (format) {
 			case 'svg':
-				Promise.resolve(this.toSvg(shape, {} as SvgExportContext)).then((svg: SVGElement) => {
-					this.downloadSvg(svg);
-				});
+				// SVG export removed due to API changes - use PNG instead
+				this.toPng(shape);
 				break;
 			case 'png':
 				this.toPng(shape);
@@ -304,27 +275,43 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 	}
 
 	async toPng(shape: PreviewShape) {
-		const svg = await this.toSvg(shape, {} as SvgExportContext);
-		const canvas = document.createElement('canvas');
-		const ctx = canvas.getContext('2d');
-		const img = new Image();
+		// Export the iframe content directly using html2canvas
+		const iframe = document.getElementById(`iframe-1-${shape.id}`) as HTMLIFrameElement;
+		if (!iframe || !iframe.contentWindow) {
+			console.error('Iframe not found or not accessible');
+			return;
+		}
 		
-		img.onload = () => {
-			canvas.width = shape.props.w;
-			canvas.height = shape.props.h;
-			ctx!.drawImage(img, 0, 0, shape.props.w, shape.props.h);
+		// Request screenshot from iframe
+		return new Promise<void>((resolve) => {
+			const messageListener = (event: MessageEvent) => {
+				if (event.data.screenshot && event.data?.shapeid === shape.id) {
+					window.removeEventListener('message', messageListener);
+					
+					// Convert base64 to blob and download
+					fetch(event.data.screenshot)
+						.then(res => res.blob())
+						.then(blob => {
+							const url = URL.createObjectURL(blob);
+							const link = document.createElement('a');
+							link.href = url;
+							link.download = 'exported_image.png';
+							link.click();
+							URL.revokeObjectURL(url);
+							resolve();
+						});
+				}
+			};
 			
-			canvas.toBlob((blob) => {
-				const url = URL.createObjectURL(blob!);
-				const link = document.createElement('a');
-				link.href = url;
-				link.download = 'exported_image.png';
-				link.click();
-				URL.revokeObjectURL(url);
-			}, 'image/png');
-		};
-		
-		img.src = 'data:image/svg+xml;base64,' + btoa(new XMLSerializer().serializeToString(svg));
+			window.addEventListener('message', messageListener);
+			iframe.contentWindow!.postMessage({ action: 'take-screenshot', shapeid: shape.id }, '*');
+			
+			// Timeout after 3 seconds
+			setTimeout(() => {
+				window.removeEventListener('message', messageListener);
+				resolve();
+			}, 3000);
+		});
 	}
 
 	toJson(shape: PreviewShape) {

@@ -1,4 +1,4 @@
-import { Editor, createShapeId, getSvgAsImage } from '@tldraw/tldraw'
+import { Editor, createShapeId } from '@tldraw/tldraw'
 import { getSelectionAsText } from './getSelectionAsText'
 import { getHtmlFromProvider } from './getHtmlFromProvider'
 import { blobToBase64 } from './blobToBase64'
@@ -43,14 +43,29 @@ export async function makeReal(editor: Editor, _: string, systemMessage: string,
 
 	if (!svg) throw Error(`Could not get the SVG.`)
 
-	const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
 	console.log('Converting SVG to image...')
-	const blob = await getSvgAsImage(svg, IS_SAFARI, {
-		type: 'png',
-		quality: 0.8,
-		scale: 1,
+	const svgString = new XMLSerializer().serializeToString(svg)
+	
+	// Convert SVG to PNG using canvas
+	const canvas = document.createElement('canvas')
+	const ctx = canvas.getContext('2d')
+	const img = new Image()
+	
+	const blob = await new Promise<Blob>((resolve, reject) => {
+		img.onload = () => {
+			canvas.width = svg.width.baseVal.value
+			canvas.height = svg.height.baseVal.value
+			ctx!.drawImage(img, 0, 0)
+			canvas.toBlob((b) => {
+				if (b) resolve(b)
+				else reject(new Error('Failed to convert canvas to blob'))
+			}, 'image/png', 0.8)
+		}
+		img.onerror = reject
+		img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)))
 	})
-	const dataUrl = await blobToBase64(blob!)
+	
+	const dataUrl = await blobToBase64(blob)
 	console.log('Image converted to base64, length:', dataUrl.length)
 
 	const previousPreviews = selectedShapes.filter((shape) => {

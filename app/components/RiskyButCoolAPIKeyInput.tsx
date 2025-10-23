@@ -1,4 +1,3 @@
-import { Icon } from '@tldraw/tldraw'
 import { ChangeEvent, useCallback } from 'react'
 
 export function RiskyButCoolAPIKeyInput() {
@@ -26,7 +25,11 @@ export function RiskyButCoolAPIKeyInput() {
 					/>
 				</div>
 				<button className="question__button" onClick={handleQuestionMessage}>
-					<Icon icon="question" />
+					<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+						<circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+						<path d="M8 6a1 1 0 1 1 0 2v3" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+						<circle cx="8" cy="12" r="0.5"/>
+					</svg>
 				</button>
 			</div>
 		</div>
