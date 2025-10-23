@@ -1,11 +1,12 @@
 import { Editor, createShapeId, getSvgAsImage } from '@tldraw/tldraw'
 import { getSelectionAsText } from './getSelectionAsText'
-import { getHtmlFromAnthropic } from './getHtmlFromAnthropic'
+import { getHtmlFromProvider } from './getHtmlFromProvider'
 import { blobToBase64 } from './blobToBase64'
 import { addGridToSvg } from './addGridToSvg'
 import { PreviewShape } from '../PreviewShape/PreviewShape'
+import { Settings } from '../components/SettingsPanel'
 
-export async function makeReal(editor: Editor, _: string, systemMessage: string) {
+export async function makeReal(editor: Editor, _: string, systemMessage: string, settings: Settings) {
 	console.log('Starting makeReal function...')
 	
 	const selectedShapes = editor.getSelectedShapes()
@@ -58,28 +59,18 @@ export async function makeReal(editor: Editor, _: string, systemMessage: string)
 	console.log('Previous previews count:', previousPreviews.length)
 
 	try {
-		console.log('Making request to Anthropic API...')
-		const json = await getHtmlFromAnthropic({
+		console.log(`Making request to ${settings.provider} API...`)
+		const json = await getHtmlFromProvider({
 			image: dataUrl,
-			apiKey: '',
 			text: getSelectionAsText(editor),
+			settings,
 			previousPreviews,
 			grid,
 			theme: editor.user.getUserPreferences().isDarkMode ? 'dark' : 'light',
 			systemMessage,
 		})
 
-		if (!json) {
-			console.error('No response from Anthropic API')
-			throw Error('Could not contact Anthropic API.')
-		}
-
-		if (json?.error) {
-			console.error('Anthropic API error:', json.error)
-			throw Error(`${json.error.message?.slice(0, 128)}...`)
-		}
-
-		console.log('Got response from Anthropic API')
+		console.log(`Got response from ${settings.provider} API`)
 		const message = json.choices[0].message.content
 		console.log('Raw message:', message)
 		
