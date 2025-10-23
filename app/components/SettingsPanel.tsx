@@ -23,8 +23,12 @@ const PROVIDER_MODELS = {
     'claude-3-haiku-20240307',
   ],
   openai: [
-    // GPT-5
+    // GPT-5 series
     'gpt-5',
+    'gpt-5-mini',
+    'gpt-5-nano',
+    'gpt-5-chat',
+    'gpt-5-pro',
     // O-series (reasoning models)
     'o3',
     'o3-pro',
@@ -42,18 +46,57 @@ const PROVIDER_MODELS = {
     'gpt-4',
   ],
   openrouter: [
-    // Popular models via OpenRouter
+    // Anthropic Claude (Vision)
+    'anthropic/claude-sonnet-4.5',
+    'anthropic/claude-sonnet-4',
+    'anthropic/claude-3.7-sonnet',
+    'anthropic/claude-3.7-sonnet:thinking',
     'anthropic/claude-3.5-sonnet',
+    'anthropic/claude-3.5-haiku',
     'anthropic/claude-3-opus',
+    'anthropic/claude-3-sonnet',
+    // OpenAI via OpenRouter
     'openai/gpt-5',
+    'openai/gpt-5-mini',
+    'openai/gpt-5-nano',
     'openai/o3',
+    'openai/o3-pro',
     'openai/o3-mini',
+    'openai/o4-mini',
     'openai/gpt-4.1',
+    'openai/gpt-4.1-mini',
     'openai/gpt-4o',
+    'openai/gpt-4o-mini',
+    // Google Gemini (Vision)
+    'google/gemini-2.5-pro',
+    'google/gemini-2.5-flash',
+    'google/gemini-2.5-flash-preview:thinking',
+    'google/gemini-2.5-flash-image-preview',
+    'google/gemini-2.0-flash-001',
     'google/gemini-2.0-flash-exp:free',
+    'google/gemini-pro-vision',
     'google/gemini-pro-1.5',
+    'google/gemma-3-27b-it:free',
+    'google/gemma-3-12b-it:free',
+    'google/gemma-3-4b-it:free',
+    // Meta Llama (Vision)
+    'meta-llama/llama-4-maverick',
     'meta-llama/llama-3.2-90b-vision-instruct',
+    'meta-llama/llama-3.2-11b-vision-instruct:free',
+    // xAI Grok (Vision)
+    'x-ai/grok-4',
+    'x-ai/grok-4-fast:free',
+    'x-ai/grok-vision-beta',
+    // Qwen (Vision)
+    'qwen/qwen2.5-vl-72b-instruct:free',
+    'qwen/qwen2.5-vl-32b-instruct:free',
     'qwen/qwen-2-vl-72b-instruct',
+    // Mistral (Vision)
+    'mistralai/mistral-small-3.1-24b-instruct:free',
+    // Moonshotai (Vision)
+    'moonshotai/kimi-vl-a3b-thinking:free',
+    // 01.AI (Vision)
+    '01-ai/yi-vision',
   ],
   lmstudio: [
     // User's locally loaded models
