@@ -2,11 +2,11 @@
 
 import dynamic from 'next/dynamic'
 import '@tldraw/tldraw/tldraw.css'
-import { MakeRealButton } from './components/MakeRealButton'
+import { Toolbar } from './components/Toolbar'
 import { TldrawLogo } from './components/TldrawLogo'
 import { PreviewShapeUtil } from './PreviewShape/PreviewShape'
 import { SystemMessageEditor } from './components/SystemMessageEditor'
-import { SettingsPanel, Settings } from './components/SettingsPanel'
+import { Settings } from './components/SettingsPanel'
 import { useState, useEffect } from 'react'
 import { OPEN_AI_SYSTEM_PROMPT } from './prompt'
 import { Tldraw as TldrawComponent } from '@tldraw/tldraw'
@@ -58,11 +58,16 @@ export default function App() {
 		<div className="editor">
 			<Tldraw
 				persistenceKey="make-real"
-				shareZone={<MakeRealButton systemMessage={systemMessage} settings={settings} />}
+				shareZone={
+					<Toolbar
+						systemMessage={systemMessage}
+						settings={settings}
+						onSettingsSave={handleSettingsSave}
+					/>
+				}
 				shapeUtils={shapeUtils}
 			>
 				<TldrawLogo />
-				<SettingsPanel initialSettings={settings} onSave={handleSettingsSave} />
 				<SystemMessageEditor initialMessage={systemMessage} onSave={setSystemMessage} />
 			</Tldraw>
 		</div>

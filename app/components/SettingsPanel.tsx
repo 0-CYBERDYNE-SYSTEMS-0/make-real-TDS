@@ -92,11 +92,12 @@ export function SettingsPanel({ initialSettings, onSave }: SettingsPanelProps) {
   if (!isOpen) {
     return (
       <button
-        className="settings-panel-button"
+        className="settings-button"
         onClick={() => setIsOpen(true)}
         title="Settings"
       >
         <Icon icon="gear" />
+        <span className="settings-button-text">Settings</span>
       </button>
     );
   }
