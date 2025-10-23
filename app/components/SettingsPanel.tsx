@@ -66,6 +66,10 @@ export function SettingsPanel({ initialSettings, onSave }: SettingsPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
+  console.log('[SettingsPanel] Current settings:', settings);
+  console.log('[SettingsPanel] isOpen:', isOpen);
+  console.log('[SettingsPanel] showAdvanced:', showAdvanced);
+
   useEffect(() => {
     setSettings(initialSettings);
   }, [initialSettings]);
@@ -90,17 +94,24 @@ export function SettingsPanel({ initialSettings, onSave }: SettingsPanelProps) {
   };
 
   if (!isOpen) {
+    console.log('[SettingsPanel] Rendering closed button');
     return (
       <button
         className="settings-button"
-        onClick={() => setIsOpen(true)}
+        onClick={() => {
+          console.log('[SettingsPanel] Button clicked, opening...');
+          setIsOpen(true);
+        }}
         title="Settings"
+        style={{ border: '2px solid blue' }}
       >
         <Icon icon="gear" />
         <span className="settings-button-text">Settings</span>
       </button>
     );
   }
+
+  console.log('[SettingsPanel] Rendering open panel');
 
   return (
     <div className="settings-panel-overlay" onClick={() => setIsOpen(false)}>

@@ -13,6 +13,8 @@ export function Toolbar({ systemMessage, settings, onSettingsSave }: ToolbarProp
 	const editor = useEditor()
 	const { addToast } = useToasts()
 
+	console.log('[Toolbar] Rendering with settings:', settings);
+
 	const handleMakeReal = useCallback(async () => {
 		try {
 			await makeReal(editor, '', systemMessage, settings)
@@ -26,8 +28,10 @@ export function Toolbar({ systemMessage, settings, onSettingsSave }: ToolbarProp
 		}
 	}, [editor, addToast, systemMessage, settings])
 
+	console.log('[Toolbar] About to render toolbar-container');
+
 	return (
-		<div className="toolbar-container">
+		<div className="toolbar-container" style={{ background: 'var(--color-low)', border: '2px solid red' }}>
 			<SettingsPanel initialSettings={settings} onSave={onSettingsSave} />
 			<button
 				className="makeRealButton"
